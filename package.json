@@ -3,33 +3,32 @@
   "version": "0.0.3",
   "description": "A helper to categorize port numbers and understand what they mean.",
   "homepage": "https://github.com/solladay/port-type",
-  "author": "Seth Holladay",
   "author": {
     "name": "Seth Holladay",
     "url": "http://seth-holladay.com"
   },
   "main": "index.js",
   "scripts": {
-    "test": "node node_modules/.bin/grunt test"
+    "test": "grunt test"
   },
-  "engineStrict": true,
   "engines": {
-    "node": "~0.10.36",
-    "npm": "~2.7.0"
+    "node": "^4.1.2",
+    "npm": "^3.3.5"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:sholladay/port-type.git"
   },
   "bugs": {
-    "url": "https://github.com/solladay/port-type/issues"
+    "url": "https://github.com/solladay/port-type/issues",
+    "email": "bugs@seth-holladay.com"
   },
   "license": "MPL-2.0",
   "directories": {
-    "doc": "./doc",
-    "man": "./man",
     "lib": "./lib",
-    "bin": "./bin"
+    "bin": "./bin",
+    "doc": "./doc",
+    "man": "./man"
   },
   "keywords": [
     "dynamic",
@@ -43,11 +42,14 @@
     "grunt": "0.4.5",
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "0.6.0",
-    "grunt-contrib-jshint": "0.11.0",
+    "grunt-contrib-jshint": "0.11.3",
     "grunt-contrib-watch": "0.6.1",
-    "grunt-jscs": "1.2.0",
-    "grunt-jslint": "1.1.12",
+    "grunt-jscs": "2.1.0",
+    "grunt-jslint": "1.1.14",
     "grunt-jsonlint": "1.0.4",
-    "intern": "2.2.2"
+    "intern": "3.0.6"
+  },
+  "dependencies": {
+    "is-root": "1.0.0"
   }
 }

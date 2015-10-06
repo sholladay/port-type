@@ -1,39 +1,27 @@
-var ports = {
-    system : {
-        min : 0,
-        max : 1023
-    },
-    registered : {
-        min : 1024,
-        max : 49151
-    },
-    dynamic : {
-        min : 49152,
-        max : 65535
-    }
-};
+'use strict';
 
-function fail(port, silent) {
-
-    if (!silent) {
-        if (typeof message === 'function') {
-            message = message(port);
-        }
-        if (!message || typeof message !== 'string') {
-            // Default.
-            message = 'Supplied port ' + port + ' is not a valid number.';
-        }
-
-        throw new Error(message);
-    }
-}
+const isRoot = require('is-root'),
+      ports = {
+          system : {
+              min : 1,
+              max : 1023
+          },
+          registered : {
+              min : 1024,
+              max : 49151
+          },
+          dynamic : {
+              min : 49152,
+              max : 65535
+          }
+      };
 
 function isInRange(port, min, max) {
 
-    var result = false;
+    let result = false;
 
-    // ports are allowed to exactly equal min or max, otherwise they
-    // must be between min and max (avoids false positives)...
+    // Ports are allowed to exactly equal min or max, otherwise they
+    // must be between min and max (avoids false positives).
     if (port === min || port === max || (min < port && port < max)) {
         result = true;
     }
@@ -41,119 +29,55 @@ function isInRange(port, min, max) {
     return result;
 }
 
-function getPortType(port) {
+function portType(port) {
 
-    var min, max, result;
+    let min, max;
 
-    for (type in ports) {
+    // Special case. Port 0 means a system-allocated dynamic port.
+    if (port === 0) {
+        return 'dynamic';
+    }
+
+    for (let type in ports) {
         if (Object.prototype.hasOwnProperty.call(ports, type)) {
             min = ports[type].min;
             max = ports[type].max;
             if (isInRange(port, min, max)) {
-                result = type;
-                break;
+                return type;
             }
         }
     }
-
-    return result;
-}
-
-function tryToFindNumber(port, silent) {
-
-    var firstNumber = /-?\d*\.?\d+/,
-        matches,
-        result;
-
-    if (typeof port === 'function') {
-        // Assume the desired port still needs to be computed.
-        port = port();
-    }
-
-    if (typeof port === 'number') {
-        result = port;
-    }
-
-    else if (typeof port === 'string') {
-        matches = port.match(firstNumber);
-        if (matches) {
-            // Coerce to a number.
-            result = +(matches[0]);
-        }
-        else {
-            fail(port, silent);
-        }
-    }
-    else {
-        fail(port, silent);
-    }
-
-    return result;
-}
-
-function sanitizePort(port, silent) {
-
-    var result;
-
-    if (typeof port === 'function') {
-        port = port();
-    }
-
-    // Try to convert it to the nearest integer.
-    result = Math.round(
-        tryToFindNumber(port)
-    );
-
-    // Try to turn it into a positive number.
-    result = Math.abs(result);
-
-    // Final sanity check.
-    if (Number.isNaN(result)) {
-        fail(port, silent);
-    }
-
-    return result;
-}
-
-function app(port, silent) {
-
-    var result;
-
-    port = sanitizePort(port, silent);
-
-    if (port) {
-        result = getPortType(port);
-    }
-
-    return result;
 }
 function isSystem(port) {
-    return app(port) === 'system';
-}
-function isWellKnown(port) {
-    // alias
-    return isSystem(port);
+    return portType(port) === 'system';
 }
 function isRegistered(port) {
-    return app(port) === 'registered';
+    return portType(port) === 'registered';
 }
 function isDynamic(port) {
-    return app(port) === 'dynamic';
+    return portType(port) === 'dynamic';
 }
-function isPrivate(port) {
-    // alias
-    return isDynamic(port);
-}
+// API to ask whether binding to a port would require
+// elevated privileges on the current platform.
 function needsRoot(port) {
     return process.platform === 'win32' ? false : isSystem(port);
 }
+// API to ask whether we have the necessary privileges
+// to bind to a port.
 function haveRights(port) {
-    return !needsRoot(port) || require('is-root')();
+    return needsRoot(port) && isRoot();
 }
-app.isSystem     = isSystem;
-app.isWellKnown  = isWellKnown;
-app.isRegistered = isRegistered;
-app.isDynamic    = isDynamic;
-app.needsRoot    = needsRoot;
 
-module.exports = app;
+portType.isSystem     = isSystem;
+portType.isRegistered = isRegistered;
+portType.isDynamic    = isDynamic;
+
+// Aliases.
+portType.isWellKnown = isSystem;
+portType.isPrivate = isDynamic;
+
+// Permission utilities.
+portType.needsRoot    = needsRoot;
+portType.haveRights   = haveRights;
+
+module.exports = portType;
