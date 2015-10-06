@@ -1,6 +1,6 @@
 {
   "name": "port-type",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "A helper to categorize port numbers and understand what they mean.",
   "homepage": "https://github.com/solladay/port-type",
   "author": {
