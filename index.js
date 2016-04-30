@@ -1,32 +1,31 @@
 'use strict';
 
-const isRoot = require('is-root'),
-      ports = {
-          system : {
-              min : 1,
-              max : 1023
-          },
-          registered : {
-              min : 1024,
-              max : 49151
-          },
-          dynamic : {
-              min : 49152,
-              max : 65535
-          }
-      };
+const
+    isRoot = require('is-root'),
+    ports = {
+        system : {
+            min : 1,
+            max : 1023
+        },
+        registered : {
+            min : 1024,
+            max : 49151
+        },
+        dynamic : {
+            min : 49152,
+            max : 65535
+        }
+    };
 
 function isInRange(port, min, max) {
-
-    let result = false;
 
     // Ports are allowed to exactly equal min or max, otherwise they
     // must be between min and max (avoids false positives).
     if (port === min || port === max || (min < port && port < max)) {
-        result = true;
+        return true;
     }
 
-    return result;
+    return false;
 }
 
 function portType(port) {
@@ -38,13 +37,11 @@ function portType(port) {
         return 'dynamic';
     }
 
-    for (let type in ports) {
-        if (Object.prototype.hasOwnProperty.call(ports, type)) {
-            min = ports[type].min;
-            max = ports[type].max;
-            if (isInRange(port, min, max)) {
-                return type;
-            }
+    for (const type in ports) {
+        min = ports[type].min;
+        max = ports[type].max;
+        if (isInRange(port, min, max)) {
+            return type;
         }
     }
 }
