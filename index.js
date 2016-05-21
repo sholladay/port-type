@@ -30,17 +30,13 @@ function isInRange(port, min, max) {
 
 function portType(port) {
 
-    let min, max;
-
     // Special case. Port 0 means a system-allocated dynamic port.
     if (port === 0) {
         return 'dynamic';
     }
 
     for (const type in ports) {
-        min = ports[type].min;
-        max = ports[type].max;
-        if (isInRange(port, min, max)) {
+        if (isInRange(port, ports[type].min, ports[type].max)) {
             return type;
         }
     }
@@ -62,7 +58,7 @@ function needsRoot(port) {
 // API to ask whether we have the necessary privileges
 // to bind to a port.
 function haveRights(port) {
-    return needsRoot(port) && isRoot();
+    return !needsRoot(port) || isRoot();
 }
 
 portType.isSystem     = isSystem;
@@ -71,7 +67,7 @@ portType.isDynamic    = isDynamic;
 
 // Aliases.
 portType.isWellKnown = isSystem;
-portType.isPrivate = isDynamic;
+portType.isPrivate   = isDynamic;
 
 // Permission utilities.
 portType.needsRoot    = needsRoot;
