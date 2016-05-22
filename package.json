@@ -1,6 +1,6 @@
 {
   "name": "port-type",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Categorize port numbers by semantics.",
   "homepage": "https://github.com/sholladay/port-type",
   "main": "index.js",
