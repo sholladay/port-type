@@ -1,76 +1,62 @@
 'use strict';
 
-const
-    isRoot = require('is-root'),
-    ports = {
-        system : {
-            min : 1,
-            max : 1023
-        },
-        registered : {
-            min : 1024,
-            max : 49151
-        },
-        dynamic : {
-            min : 49152,
-            max : 65535
-        }
-    };
+const isRoot = require('is-root');
 
-function isInRange(port, min, max) {
+const range = {
+    system : {
+        min : 1,
+        max : 1023
+    },
+    registered : {
+        min : 1024,
+        max : 49151
+    },
+    dynamic : {
+        min : 49152,
+        max : 65535
+    }
+};
 
+const isInRange = (port, min, max) => {
     // Ports are allowed to exactly equal min or max, otherwise they
     // must be between min and max (avoids false positives).
-    if (port === min || port === max || (min < port && port < max)) {
-        return true;
-    }
+    return port === min || port === max || (min < port && port < max);
+};
 
-    return false;
-}
+const is = (port) => {
+    return Object.keys(range).find((type) => {
+        return module.exports['is' + type[0].toUpperCase() + type.substring(1)](port);
+    });
+};
 
-function portType(port) {
+const isSystem = (port) => {
+    return isInRange(port, range.system.min, range.system.max);
+};
+const isRegistered = (port) => {
+    return isInRange(port, range.registered.min, range.registered.max);
+};
+const isDynamic = (port) => {
+    // Zero is a wildcard for a dynamic port.
+    // See: http://unix.stackexchange.com/a/180500
+    return port === 0 || isInRange(port, range.dynamic.min, range.dynamic.max);
+};
 
-    // Special case. Port 0 means a system-allocated dynamic port.
-    if (port === 0) {
-        return 'dynamic';
-    }
-
-    for (const type in ports) {
-        if (isInRange(port, ports[type].min, ports[type].max)) {
-            return type;
-        }
-    }
-}
-function isSystem(port) {
-    return portType(port) === 'system';
-}
-function isRegistered(port) {
-    return portType(port) === 'registered';
-}
-function isDynamic(port) {
-    return portType(port) === 'dynamic';
-}
-// API to ask whether binding to a port would require
-// elevated privileges on the current platform.
-function needsRoot(port) {
+// Find out if binding to a port would require elevated privileges
+// on the current platform.
+const needsRoot = (port) => {
     return process.platform === 'win32' ? false : isSystem(port);
-}
-// API to ask whether we have the necessary privileges
-// to bind to a port.
-function haveRights(port) {
+};
+// Find out if we have the necessary privileges to bind to a port.
+const haveRights = (port) => {
     return !needsRoot(port) || isRoot();
-}
+};
 
-portType.isSystem     = isSystem;
-portType.isRegistered = isRegistered;
-portType.isDynamic    = isDynamic;
-
-// Aliases.
-portType.isWellKnown = isSystem;
-portType.isPrivate   = isDynamic;
-
-// Permission utilities.
-portType.needsRoot    = needsRoot;
-portType.haveRights   = haveRights;
-
-module.exports = portType;
+module.exports = {
+    range,
+    is,
+    isSystem,
+    isRegistered,
+    isDynamic,
+    needsRoot,
+    haveRights
+};
