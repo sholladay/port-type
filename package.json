@@ -31,8 +31,8 @@
     "is-root": "^1.0.0"
   },
   "devDependencies": {
-    "eslint-config-tidy": "^0.3.0",
-    "xo": "^0.16.0"
+    "eslint-config-tidy": "^0.4.0",
+    "xo": "^0.17.1"
   },
   "keywords": [
     "port",

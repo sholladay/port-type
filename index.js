@@ -44,7 +44,7 @@ const isDynamic = (port) => {
 // Find out if binding to a port would require elevated privileges
 // on the current platform.
 const needsRoot = (port) => {
-    return process.platform === 'win32' ? false : isSystem(port);
+    return process.platform !== 'win32' && isSystem(port);
 };
 // Find out if we have the necessary privileges to bind to a port.
 const haveRights = (port) => {
